@@ -1,0 +1,50 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Product
+
+<h2 class="text-center mt-5">Adaugare produs</h2>
+
+<br />
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-6 offset-3">
+            <form method="post" asp-action="New" asp-controller="Products">
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">Nume Produs</label>
+                    <br />
+                    <input asp-for="Name" class="form-control" />
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Price" class="form-label">Pret Produs</label>
+                    <br />
+                    <input asp-for="Price" class="form-control" />
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">Descriere Produs</label>
+                    <br />
+                    <input asp-for="Description" class="form-control" />
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Ingredients" class="form-label">Ingrediente Active Produs</label>
+                    <br />
+                    <input asp-for="Ingredients" class="form-control" />
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <select asp-for="CategoryId" asp-items="Model.Categ"
+                            class="form-control">
+                        <option value="">Selectati categoria</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success" type="submit">Adauga produs</button>
+            </form>
+        </div>
+    </div>
+</div>

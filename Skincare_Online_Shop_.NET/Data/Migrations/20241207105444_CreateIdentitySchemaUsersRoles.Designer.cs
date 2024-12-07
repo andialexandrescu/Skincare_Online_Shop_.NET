@@ -12,7 +12,7 @@ using Skincare_Online_Shop_.NET.Data;
 namespace Skincare_Online_Shop_.NET.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241207100707_CreateIdentitySchemaUsersRoles")]
+    [Migration("20241207105444_CreateIdentitySchemaUsersRoles")]
     partial class CreateIdentitySchemaUsersRoles
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

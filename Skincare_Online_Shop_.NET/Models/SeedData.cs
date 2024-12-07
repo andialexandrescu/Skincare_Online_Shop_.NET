@@ -24,7 +24,7 @@ namespace Skincare_Online_Shop_.NET.Models
                 // daca nu contine roluri, acestea se vor crea
                 context.Roles.AddRange(
                 new IdentityRole { Id = "9adab8e5-49e2-4a33-99d0-2758a8f28364", Name = "Admin", NormalizedName = "Admin".ToUpper() },
-                new IdentityRole { Id = "dd55f142-b710-4585-9bb7-8f0b71a3f630", Name = "Editor", NormalizedName = "Editor".ToUpper() },
+                new IdentityRole { Id = "dd55f142-b710-4585-9bb7-8f0b71a3f630", Name = "Partner", NormalizedName = "Partner".ToUpper() },
                 new IdentityRole { Id = "c3285489-6ae5-4096-b624-84c1cc9914f4", Name = "User", NormalizedName = "User".ToUpper() }
                 );
                 // o noua instanta pe care o vom utiliza pentru crearea parolelor utilizatorilor
@@ -46,12 +46,12 @@ namespace Skincare_Online_Shop_.NET.Models
                 new ApplicationUser
                 {
                     Id = "eb9255f5-b989-4c16-b263-c34b894b7740", // primary key
-                    UserName = "editor@test.com",
+                    UserName = "partner@test.com",
                     EmailConfirmed = true,
-                    NormalizedEmail = "EDITOR@TEST.COM",
-                    Email = "editor@test.com",
-                    NormalizedUserName = "EDITOR@TEST.COM",
-                    PasswordHash = hasher.HashPassword(null, "Editor1!")
+                    NormalizedEmail = "PARTNER@TEST.COM",
+                    Email = "partner@test.com",
+                    NormalizedUserName = "PARTNER@TEST.COM",
+                    PasswordHash = hasher.HashPassword(null, "Partner1!")
                 },
                 new ApplicationUser
                 {

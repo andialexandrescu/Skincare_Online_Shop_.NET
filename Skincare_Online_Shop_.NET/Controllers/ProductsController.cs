@@ -251,23 +251,21 @@ namespace Skincare_Online_Shop_.NET.Controllers
         // se afiseaza formularul impreuna cu datele aferente produsului din baza de date
         // doar utilizatorii cu rolul de Editor si Admin pot edita articole, iar adminii pot edita orice articol din baza de date si editorii pot edita doar articolele proprii (cele pe care ei le-au postat)
         [Authorize(Roles = "Partner,Admin")]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
+            var product = await db.Products.Include(p => p.Category)
+                                           .FirstOrDefaultAsync(p => p.Id == id);
 
-            Product product = db.Products.Include("Category")
-                                         .Where(p => p.Id == id)
-                                         .First();
-            product.Categ = GetAllCategories();
-
-            if(product == null)
+            if (product == null)
             {
                 TempData["message"] = "We couldn't locate the product in our database. Please check if it was deleted by you, an admin, or if the category itself has been deleted";
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Index");
             }
 
-            if ((product.UserId == _userManager.GetUserId(User)) || User.IsInRole("Admin"))
+            if (product.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
             {
+                product.Categ = GetAllCategories();
                 return View(product);
             }
             else
@@ -278,16 +276,58 @@ namespace Skincare_Online_Shop_.NET.Controllers
             }
         }
 
-        // se adauga articolul modificat in baza de date si se verifica rolul utilizatorilor care au dreptul sa editeze (Editor si Admin)
+
+        /*[HttpPost]
+        [Authorize(Roles = "Partner,Admin")]
+        public IActionResult Edit(int id, Product requestProduct)
+        {
+            Product product = db.Products.Find(id);
+
+            if(product == null)
+            {
+                TempData["message"] = "We couldn't locate the product in our database";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            try// tot in afara de image
+            {
+                product.Name = requestProduct.Name;
+                product.Description = requestProduct.Description;
+                product.Ingredients = requestProduct.Ingredients;
+                product.Price = requestProduct.Price;
+                product.Brand = requestProduct.Brand;
+                product.DateListed = DateTime.Now;
+                product.Quantity = requestProduct.Quantity;
+                product.CategoryId = requestProduct.CategoryId;
+                db.SaveChanges();
+                TempData["message"] = "The product has been successfully updated";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Index");
+            }
+            catch (Exception e)
+            {
+                requestProduct.Categ = GetAllCategories();
+                return View(requestProduct);
+            }
+        }*/
         [HttpPost]
         [Authorize(Roles = "Partner,Admin")]
         public async Task<IActionResult> Edit(int id, Product requestProduct, IFormFile image)
         {
-            Product product = await db.Products.FindAsync(id);
-
-            if (ModelState.IsValid)
+            try
             {
-                if((product.UserId == _userManager.GetUserId(User)) || User.IsInRole("Admin"))
+                // Retrieve the product from the database asynchronously
+                Product product = await db.Products.FindAsync(id);
+
+                if (product == null)
+                {
+                    TempData["message"] = "The product was not found.";
+                    return RedirectToAction("Index");
+                }
+
+                // Check if the user has permission to edit the product
+                if (product.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
                 {
                     product.Name = requestProduct.Name;
                     product.Description = requestProduct.Description;
@@ -300,15 +340,21 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
                     if (image != null && image.Length > 0)
                     {
-                        var allowedExtensions = new[] {".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG"};
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".JPG", ".PNG", ".JPEG" };
                         var fileExtension = Path.GetExtension(image.FileName).ToLower();
                         if (!allowedExtensions.Contains(fileExtension))
                         {
-                            ModelState.AddModelError("ProductImage", "The file must be an image and only .jpg, .jpeg and .png extensions are allowed!");
+                            ModelState.AddModelError("Image", "The file must be an image and only .jpg, .jpeg and .png extensions are allowed!");
+                            requestProduct.Categ = GetAllCategories();
                             return View(requestProduct);
                         }
 
-                        var storagePath = Path.Combine(_env.WebRootPath, "images", image.FileName);
+                        var imagesDirectory = Path.Combine(_env.WebRootPath, "images");
+                        if (!Directory.Exists(imagesDirectory))
+                        {
+                            Directory.CreateDirectory(imagesDirectory);
+                        }
+                        var storagePath = Path.Combine(imagesDirectory, image.FileName);
                         var databaseFileName = "/images/" + image.FileName;
 
                         using (var fileStream = new FileStream(storagePath, FileMode.Create))
@@ -318,11 +364,106 @@ namespace Skincare_Online_Shop_.NET.Controllers
                         ModelState.Remove(nameof(product.Image));
                         product.Image = databaseFileName;
                     }
+                    /*ModelState.ClearValidationState(nameof(product));
+                    if (!TryValidateModel(product))
+                    {
+                        product.Categ = GetAllCategories();
+                        return View(product);
+                    }*/
 
-                    TempData["message"] = "The product has been modified";
-                    TempData["messageType"] = "alert-success";
                     await db.SaveChangesAsync();
+                    TempData["message"] = "The product has been successfully updated";
+                    TempData["messageType"] = "alert-success";
                     return RedirectToAction("Index");
+                }
+
+                TempData["message"] = "You do not have permission to edit a product that does not belong to you";
+                return RedirectToAction("Index");
+            }
+            catch (Exception e)
+            {
+                requestProduct.Categ = GetAllCategories();
+                return View(requestProduct);
+            }
+        }
+
+
+
+
+        // se adauga articolul modificat in baza de date si se verifica rolul utilizatorilor care au dreptul sa editeze (Editor si Admin)
+        /*[HttpPost]
+        [Authorize(Roles = "Partner,Admin")]
+        public async Task<IActionResult> Edit(int id, Product requestProduct, IFormFile image)
+        {
+            Product product = await db.Products.FindAsync(id);
+
+            if(product == null)
+            {
+                TempData["message"] = "We couldn't locate the product in our database. Please check if it was deleted by you, an admin, or if the category itself has been deleted";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            if(ModelState.IsValid)
+            {
+                if((product.UserId == _userManager.GetUserId(User)) || User.IsInRole("Admin"))
+                {
+                    if (image != null && image.Length > 0)
+                    {
+                        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".JPG", ".JPEG", ".PNG" };
+                        var fileExtension = Path.GetExtension(image.FileName).ToLower();
+                        if (!allowedExtensions.Contains(fileExtension))
+                        {
+                            ModelState.AddModelError("ProductImage", "The file must be an image and only .jpg, .jpeg and .png extensions are allowed!");
+                            requestProduct.Categ = GetAllCategories();
+                            return View(requestProduct);
+                        }
+
+                        var imagesDirectory = Path.Combine(_env.WebRootPath, "images");
+                        if (!Directory.Exists(imagesDirectory))
+                        {
+                            Directory.CreateDirectory(imagesDirectory);
+                        }
+                        var storagePath = Path.Combine(imagesDirectory, image.FileName);
+                        var databaseFileName = "/images/" + image.FileName;
+
+                        using (var fileStream = new FileStream(storagePath, FileMode.Create))
+                        {
+                            await image.CopyToAsync(fileStream);
+                        }
+                        product.Image = databaseFileName;
+                        //ModelState.Remove(nameof(product.Image));
+                        //product.Image = databaseFileName;
+                    }
+                    if(TryValidateModel(product))
+                    {
+                        product.Name = requestProduct.Name;
+                        //product.Image = requestProduct.Image;
+                        product.Description = requestProduct.Description;
+                        product.Ingredients = requestProduct.Ingredients;
+                        product.Price = requestProduct.Price;
+                        product.Brand = requestProduct.Brand;
+                        product.DateListed = DateTime.Now;
+                        product.Quantity = requestProduct.Quantity;
+                        product.CategoryId = requestProduct.CategoryId;
+
+                        await db.SaveChangesAsync();
+
+                        TempData["message"] = "The product has been modified";
+                        TempData["messageType"] = "alert-success";
+                        return RedirectToAction("Index");
+                    }
+                    requestProduct.Categ = GetAllCategories();
+                    return View(requestProduct);
+
+                    //ModelState.ClearValidationState(nameof(product));// se verifca model state-ul lui requestProduct, nu cel al lui product
+                    //if (!TryValidateModel(product))
+                    //{
+                    //    requestProduct.Categ = GetAllCategories();
+                    //    return View(requestProduct);
+                    //}
+
+
                 }
                 else
                 {
@@ -336,8 +477,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
                 requestProduct.Categ = GetAllCategories();
                 return View(requestProduct);
             }
-        }
-
+        }*/
 
         // se sterge un articol din baza de date 
         // utilizatorii cu rolul de Partner sau Admin pot sterge articole (colaboratorii pot sterge doar articolele publicate de ei, iar adminii pot sterge orice articol de baza de date

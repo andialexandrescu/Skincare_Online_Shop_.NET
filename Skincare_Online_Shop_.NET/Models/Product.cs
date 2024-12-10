@@ -17,7 +17,7 @@ namespace Skincare_Online_Shop_.NET.Models
         public string Name { get; set; }
 
         [Required(ErrorMessage = "The product image is required")]
-        public string Image {  get; set; }// de tip string pt ca se va salva calea imaginii
+        public string? Image {  get; set; }// de tip string pt ca se va salva calea imaginii
 
         [Required(ErrorMessage = "The product content is required before proceeding with the changes")]
         [StringLength(1000, ErrorMessage = "The product content cannot exceed 1000 characters")]

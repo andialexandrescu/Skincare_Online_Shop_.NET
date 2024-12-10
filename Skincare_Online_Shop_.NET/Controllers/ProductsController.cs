@@ -29,14 +29,11 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
         // se afiseaza lista tuturor produselor impreuna cu categoria din care fac parte
         // pentru fiecare produs se afiseaza si userul care a postat produsul respectiv
-        // [HttpGet] se executa implicit
         [Authorize(Roles = "User,Partner,Admin")]
         public IActionResult Index()
         {
             var products = db.Products.Include("Category")
                                       .Include("User");
-
-            ViewBag.AllProducts = products;
 
             if (TempData.ContainsKey("message"))
             {
@@ -44,13 +41,91 @@ namespace Skincare_Online_Shop_.NET.Controllers
                 ViewBag.Alert = TempData["messageType"];
             }
 
+            //sectiunea motorului de cautare
+            var search = "";
+
+            if (Convert.ToString(HttpContext.Request.Query["search"]) != null)
+            {
+                search = Convert.ToString(HttpContext.Request.Query["search"]).Trim();// eliminam spatiile libere 
+
+                List<int> productIds = db.Products.Where
+                                        (
+                                         p => p.Name.Contains(search)
+                                         || p.Description.Contains(search)
+                                        ).Select(product => product.Id).ToList();
+
+                /*implementare care nu se afla in cerinta
+                 * List<int> productIdsOfReviewsWithSearchString = db.Reviews
+                                        .Where
+                                        (
+                                         r => r.Content.Contains(search)
+                                        ).Select(review => (int)review.ProductId).ToList();
+
+                List<int> mergedIds = productIds.Union(productIdsOfReviewsWithSearchString).ToList();// se formeaza o singura lista formata din toate id-urile selectate anterior
+
+                // lista produselor care contin cuvantul cautat, fie in produs -> Name si Description, fie in review-uri -> Content
+                products = db.Products.Where(p => mergedIds.Contains(p.Id))
+                                      .Include("Category")
+                                      .Include("User");*/
+
+                products = db.Products.Where(p => productIds.Contains(p.Id))
+                                      .Include("Category")
+                                      .Include("User");
+            }
+            ViewBag.SearchString = search;
+
+            var sortOrder = Convert.ToString(HttpContext.Request.Query["sortOrder"]);// un utilizator selecteaza o optiune de sortare din meniul dropdown din vizualizare, care va fi trimisa inapoi la server folosind get
+            ViewBag.SortOrder = sortOrder;
+            ViewBag.SortOptions = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "", Text = "Select..." },
+                new SelectListItem { Value = "price_asc", Text = "Price: Low to High" },
+                new SelectListItem { Value = "price_desc", Text = "Price: High to Low" },
+                new SelectListItem { Value = "rating_asc", Text = "Rating: Low to High" },
+                new SelectListItem { Value = "rating_desc", Text = "Rating: High to Low" }
+            };
+            switch (sortOrder)
+            {
+                case "price_asc":
+                    products = products.OrderBy(p => p.Price);
+                    break;
+                case "price_desc":
+                    products = products.OrderByDescending(p => p.Price);
+                    break;
+                case "rating_asc":
+                    products = products.OrderBy(p => p.Rating);
+                    break;
+                case "rating_desc":
+                    products = products.OrderByDescending(p => p.Rating);
+                    break;
+                default:
+                    break;// nu se aplica nicio sortare
+            }
+
+            // sectiunea de afisare paginata
+            int _perPage = 4;// 4 produse per pagina
+            int totalItems = products.Count();// nr de produse curent din baza de date
+            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);// pagina curenta din View-ul asociat /Products/Index?page=valoare
+
+            var offset = 0;// offsetul va fi egal cu numarul de produse care au fost deja afisate pe paginile anterioare
+            if (!currentPage.Equals(0))
+            {
+                offset = (currentPage - 1) * _perPage;
+            }
+            var paginatedProducts = products.Skip(offset).Take(_perPage);// produsele paginate se iau in blocuri de cate 4 cu un anumit offset
+
+            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);// ultima pagina
+            ViewBag.AllProducts = paginatedProducts;
+
+            // motor de cautare si afisare paginata
+            ViewBag.PaginationBaseUrl = $"/Products/Index/?search={search}&sortOrder={sortOrder}&page=";
+
             return View();
         }
 
         // se afiseaza un singur produs in functie de id-ul impreuna cu categoria din care face parte
         // sunt preluate si toate review-urile asociate unui produs
         // se afiseaza si userul care a postat produsul respectiv
-        // [HttpGet] se executa implicit
         [Authorize(Roles = "User,Partner,Admin")]
         public IActionResult Show(int id)
         {
@@ -105,7 +180,6 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
         // se afiseaza formularul in care se vor completa datele unui produs impreuna cu selectarea categoriei din care face parte
         // doar utilizatorii cu rolul de Partner si Admin pot adauga articole in platforma
-        // [HttpGet] se executa implicit
         [Authorize(Roles = "Partner,Admin")]
         public IActionResult New()
         {
@@ -176,7 +250,6 @@ namespace Skincare_Online_Shop_.NET.Controllers
         // se editeaza un produs existent in baza de date impreuna cu categoria din care face parte, iar categoria se selecteaza dintr-un dropdown
         // se afiseaza formularul impreuna cu datele aferente produsului din baza de date
         // doar utilizatorii cu rolul de Editor si Admin pot edita articole, iar adminii pot edita orice articol din baza de date si editorii pot edita doar articolele proprii (cele pe care ei le-au postat)
-        // [HttpGet] se executa implicit
         [Authorize(Roles = "Partner,Admin")]
         public IActionResult Edit(int id)
         {

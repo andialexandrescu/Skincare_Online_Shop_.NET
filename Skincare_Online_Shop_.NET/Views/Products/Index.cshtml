@@ -11,6 +11,33 @@
 
 <br />
 
+@* motorul de cautare *@
+<form method="GET" class="mb-3">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search by keyword" name="search" value="@ViewBag.SearchString">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select id="sortOrder" name="sortOrder" class="form-select" onchange="this.form.submit()">
+                @foreach (var option in ViewBag.SortOptions)
+                {
+                    if (ViewBag.SortOrder == option.Value)
+                    {
+                        <option value="@option.Value" selected>@option.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@option.Value">@option.Text</option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</form>
+
 @foreach (var product in ViewBag.AllProducts)
 {
     <div class="card">
@@ -26,4 +53,28 @@
     <br />
     <br />
 }
+
+@* afisarea paginata a articolelor *@
+<div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link" href="@ViewBag.PaginationBaseUrl=1" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            @for(int i = 1; i <= ViewBag.lastPage; i++)
+            {
+                <li class="page-item"> <a class="page-link" href="@ViewBag.PaginationBaseUrl=@i">@(i)</a> </li>
+            }
+
+            <li class="page-item">
+                <a class="page-link" href="@ViewBag.PaginationBaseUrl=@(ViewBag.lastPage)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
 

@@ -1,0 +1,39 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Cart
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert-success p-3 rounded-3 text-center mb-5 @ViewBag.Alert">
+        @ViewBag.Message
+    </div>
+}
+
+<div class="row">
+
+    <div class="col-12">
+        <h5 class="card-title mt-5 mb-3" asp-for="Name">Shopping Cart created at: @Model.Date</h5>
+
+        @if (ViewBag.EsteAdmin)
+        {
+            <i class="bi bi-person">Created by: </i> @Model.User.UserName
+            <br />
+        }
+        Content of shopping cart:
+        <br /><br />
+    </div>
+    <br />
+
+    @if (Model.CartProducts.Count > 0)
+    {
+        @foreach (var cartProduct in Model.CartProducts)
+        {
+            <div class="col-12">
+                <div class="card" style="width: 100%;">
+                    <div class="card-body">
+                        <partial name="ProductInfo" model="cartProduct.Product" />
+                    </div>
+                </div>
+                <br />
+            </div>
+        }
+    }
+</div>

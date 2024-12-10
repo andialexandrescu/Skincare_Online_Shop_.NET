@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Skincare_Online_Shop_.NET.Data;
 
@@ -11,9 +12,11 @@ using Skincare_Online_Shop_.NET.Data;
 namespace Skincare_Online_Shop_.NET.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241207140040_CreateManyToManyRelationshipCartProducts")]
+    partial class CreateManyToManyRelationshipCartProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,15 +244,6 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("PlacedOrder")
-                        .HasColumnType("bit");
-
-                    b.Property<float>("TotalAmount")
-                        .HasColumnType("real");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -289,24 +283,6 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                     b.ToTable("CartProducts");
                 });
 
-            modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Category", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-                });
-
             modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -318,10 +294,6 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                     b.Property<string>("Brand")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CategoryId")
-                        .IsRequired()
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("DateListed")
                         .HasColumnType("datetime2");
@@ -350,51 +322,14 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<float?>("Rating")
-                        .HasColumnType("real");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -478,33 +413,9 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
 
             modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Product", b =>
                 {
-                    b.HasOne("Skincare_Online_Shop_.NET.Models.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Skincare_Online_Shop_.NET.Models.ApplicationUser", "User")
                         .WithMany("Products")
                         .HasForeignKey("UserId");
-
-                    b.Navigation("Category");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Review", b =>
-                {
-                    b.HasOne("Skincare_Online_Shop_.NET.Models.Product", "Product")
-                        .WithMany("Reviews")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Skincare_Online_Shop_.NET.Models.ApplicationUser", "User")
-                        .WithMany("Reviews")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Product");
 
                     b.Navigation("User");
                 });
@@ -514,8 +425,6 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                     b.Navigation("Carts");
 
                     b.Navigation("Products");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Cart", b =>
@@ -523,16 +432,9 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                     b.Navigation("CartProducts");
                 });
 
-            modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Category", b =>
-                {
-                    b.Navigation("Products");
-                });
-
             modelBuilder.Entity("Skincare_Online_Shop_.NET.Models.Product", b =>
                 {
                     b.Navigation("CartProducts");
-
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

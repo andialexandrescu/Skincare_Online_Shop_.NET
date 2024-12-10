@@ -1,0 +1,8 @@
+﻿<div>
+    <form asp-action="AddToCart" method="post">
+        <input type="hidden" name="productId" value="@Model.ProductId" />
+        <label for="quantity">Quantity:</label>
+        <input type="number" name="quantity" value="@Model.Quantity" min="1" required />
+        <button type="submit" class="btn btn-success">Add to Cart</button>
+    </form>
+</div>

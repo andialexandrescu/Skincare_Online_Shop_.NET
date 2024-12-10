@@ -1,0 +1,28 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Category
+@{
+    ViewBag.Title = "Displaying the category";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+<br />
+
+<p>@Model.CategoryName</p>
+
+
+<form method="post" asp-controller="Categories" asp-action="Delete"
+      asp-route-id="@Model.Id">
+
+    <button class="btn btn-danger" type="submit">Delete category</button>
+
+</form>
+
+<br />
+
+<a class="btn alert-success" href="/Categories/Index/">Display list of categories</a>
+
+<br />
+<hr />
+<br />
+

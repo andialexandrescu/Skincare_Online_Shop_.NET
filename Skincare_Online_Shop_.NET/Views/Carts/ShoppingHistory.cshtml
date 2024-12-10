@@ -1,0 +1,25 @@
+﻿
+<div class="row">
+
+    @foreach (var cart in ViewBag.AllCarts)
+    {
+        <div class="col-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="card-title" name="Date">@cart.Date</h5>
+
+                    @if (ViewBag.EsteAdmin)
+                    {
+                        <div><i class="bi bi-person">Created by: </i> @cart.User.UserName</div>
+                    }
+                    <br />
+
+                    <a asp-controller="carts" asp-action="Show" asp-route-id="@cart.Id" class="btn alert-success">Display shopping cart contents</a>
+
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

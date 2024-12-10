@@ -1,0 +1,25 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Review
+
+<h2>Edit review</h2>
+<br />
+
+<form asp-action="Edit" asp-controller="Reviews" asp-route-id="@Model.Id" method="post">
+
+    <div class="form-group">
+        <label asp-for="Rating" class="form-label">Product Rating</label>
+        <input asp-for="Rating" class="form-control" type="number"/>
+        <span asp-validation-for="Rating" class="text-danger"></span>
+    </div>
+    <br />
+
+    <div class="form-group">
+        <label asp-for="Content" class="form-label">Review content</label>
+        <br />
+        <textarea asp-for="Content" class="form-control"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+    <br />
+
+    <button class="btn btn-primary" type="submit">Edit the review</button>
+
+</form>

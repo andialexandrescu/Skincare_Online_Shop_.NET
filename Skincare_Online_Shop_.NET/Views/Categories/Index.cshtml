@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "List of categories";
+}
+
+<h2>@ViewBag.Title</h2>
+<br />
+
+@if (TempData.ContainsKey("message"))
+{
+    <h1>@ViewBag.message</h1>
+}
+
+<br />
+
+@foreach (Skincare_Online_Shop_.NET.Models.Category category in ViewBag.Categories)
+{
+    <div class="form-group">
+        <label asp-for="@category.CategoryName" class="form-label">Category name</label>
+        <div><i class="bi bi-globe"></i> @category.CategoryName</div>
+    </div>
+    <br />
+    <a class="btn alert-success" asp-controller="Categories" asp-action="Show" asp-route-id="@category.Id">Display category</a>
+    <a class="btn alert-success" asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id">Modify category</a>
+    <br />
+    <br />
+
+}
+<br />
+<a class="btn btn-success" asp-controller="Categories" asp-action="New">Add a new category</a>
+<br />
+

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Skincare_Online_Shop_.NET.Data;
 
@@ -11,9 +12,11 @@ using Skincare_Online_Shop_.NET.Data;
 namespace Skincare_Online_Shop_.NET.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241209111134_ThisValueIsInvalidError")]
+    partial class ThisValueIsInvalidError
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,15 +244,6 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("PlacedOrder")
-                        .HasColumnType("bit");
-
-                    b.Property<float>("TotalAmount")
-                        .HasColumnType("real");
-
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -323,13 +317,13 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                         .IsRequired()
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("DateListed")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("DateListed")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -351,6 +345,7 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<float?>("Rating")
+                        .IsRequired()
                         .HasColumnType("real");
 
                     b.Property<string>("UserId")
@@ -497,8 +492,7 @@ namespace Skincare_Online_Shop_.NET.Data.Migrations
                 {
                     b.HasOne("Skincare_Online_Shop_.NET.Models.Product", "Product")
                         .WithMany("Reviews")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ProductId");
 
                     b.HasOne("Skincare_Online_Shop_.NET.Models.ApplicationUser", "User")
                         .WithMany("Reviews")

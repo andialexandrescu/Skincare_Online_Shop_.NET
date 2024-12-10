@@ -1,0 +1,105 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Product
+
+@* afisarea unui produs impreuna cu categoria din care face *@
+<br />
+<div class="card">
+
+    <partial name="ProductInfo" model="Model"></partial>
+
+    @if ((ViewBag.AfisareButoane == true && Model.UserId == ViewBag.UserCurent) || ViewBag.EsteAdmin == true)
+    {
+        <div class="d-flex flex-row justify-content-between">
+
+            <a class="btn btn-success" asp-controller="Products" asp-action="Edit" asp-route-id="@Model.Id">Edit product details</a>
+            <form method="post" asp-controller="Products" asp-action="Delete" asp-route-id="@Model.Id">
+                <button class="btn btn-danger" type="submit">Delete product</button>
+            </form>
+
+        </div>
+    }
+
+</div>
+
+<br />
+<br />
+
+@* afisare reviews impreuna cu butoanele de editare si stergere *@
+@foreach (var rev in Model.Reviews)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+
+                <div>
+                    <p>@rev.Rating</p>
+                    <p>@rev.Content</p>
+                    <small>@rev.Date</small>
+                    <strong><i class="bi bi-person"> @rev.User.UserName</i></strong>
+                </div>
+                <br>
+                @if (rev.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin == true)
+                {
+                    <div class="d-flex">
+                        <div>
+                            <a class="btn btn-outline-primary" asp-controller="Reviews" asp-action="Edit" asp-route-id="@rev.Id">
+                                <i class="bi bi-pencil-square"></i> Edit review or Add content to review
+                            </a>
+
+                        </div>
+                        <div>
+                            <form method="post" asp-controller="Reviews" asp-action="Delete" asp-route-id="@rev.Id">
+
+                                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Delete review</button>
+
+                            </form>
+                        </div>
+                    </div>
+                }
+                <br />
+
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+    </div>
+}
+
+@* afisarea formularului in care se poate adauga un review *@
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+
+            <div class="card">
+                <form method="post" asp-controller="Products" asp-action="Show">
+
+                    <div class="card-body">
+                        <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                        <label>Review rating</label>
+                        <input asp-for="Rating" class="form-control" type="number" min="1" max="5" required />
+                        <span asp-validation-for="Rating" class="text-danger"></span>@*campul de validare va aparea de fapt de la Product care va fi un average al tuturor rating-urilor din toate review-urile postat de utilizatori, nu e posibil ca validarea sa fie obtinuta de la Rating din Review*@
+                        <br />
+
+                        @* evit sa introduc si Content la un review in Show deoarece in scenariul in care as incerca sa adaug doar Content fara Rating se reseteaza campul deoarece nu poate ca review sa fie returnat prin view, fiind implementat la nivelul lui product care are nevoie sa fie cel returnat in schimb, datorita logicii fundamentale de tipul Product product = db.Products.Find(id); return View(product); din metoda Show
+
+                        <label>Review content</label>
+                        <textarea class="form-control" name="Content"></textarea>
+                        <!--
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                        de fapt content din review poate sa fie null, de asemenea product are description si nu content
+                        -->
+                        <br />*@
+
+                        <button class="btn btn-success" type="submit">Add product rating</button>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+        <div class="col-md-2"></div>
+    </div>
+
+</div>

@@ -1,0 +1,22 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Product
+
+<div class="card-body">
+
+    <h3 class="card-title alert-success py-3 px-3 rounded-2">@Model.Name</h3>
+    <img src="@Model.Image" alt="Product Image" style="width: 100%; height: 450px; object-fit: cover" />
+    <div class="card-text">@Model.Description</div>
+    <div class="card-text">@Model.Ingredients</div>
+    <div class="card-text">@Model.Price</div>
+    <div class="card-text">@Model.Brand</div>
+    <div class="card-text">@Model.Quantity</div>
+
+    <a asp-controller="Carts" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-success">Go to My Cart</a>
+    <a asp-controller="Carts" asp-action="MyCart" asp-route-productId="@Model.Id" class="btn btn-success">Show Cart</a>
+
+    <div class="d-flex justify-content-between flex-row mt-5">
+        <div><i class="bi bi-globe"></i>@Model.Category.CategoryName</div>
+        <div><i class="bi bi-person"></i>@Model.User.UserName</div>
+        <span class="alert-success">@Model.DateListed</span>
+    </div>
+
+</div>

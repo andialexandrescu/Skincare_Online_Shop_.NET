@@ -1,0 +1,67 @@
+﻿@model Skincare_Online_Shop_.NET.Models.Product
+
+<h2 class="text-center mt-5">Edit product</h2>
+
+<br />
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-3">
+
+            <form method="post" asp-action="Edit" asp-controller="Products" asp-route-id="@Model.Id">
+
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">Product name</label>
+                    <br />
+                    <input asp-for="Name" class="form-control" />
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Description" class="form-label">Product description</label>
+                    <br />
+                    <textarea asp-for="Description" class="form-control"></textarea>
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Ingredients" class="form-label">Product ingredients</label>
+                    <br />
+                    <input asp-for="Ingredients" class="form-control" />
+                    <span asp-validation-for="Ingredients" class="text-danger"></span>
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Price" class="form-label">Product price</label>
+                    <br />
+                    <input asp-for="Price" class="form-control" type="number" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Brand" class="form-label">Product brand</label>
+                    <br />
+                    <input asp-for="Brand" class="form-control" />
+                    <span asp-validation-for="Brand" class="text-danger"></span>
+                    <br /><br />
+                </div>
+
+                <div class="form-group">
+                    <label for="CategoryId">Select the product category</label>
+                    <br />
+                    <select asp-for="CategoryId" asp-items="Model.Categ" class="form-control">
+                        <option value="">Select category</option>
+                    </select>
+                    <br />
+                </div>
+
+                <button class="btn btn-sm btn-success" type="submit">Edit product</button>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+

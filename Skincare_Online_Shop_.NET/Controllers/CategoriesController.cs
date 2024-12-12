@@ -7,7 +7,6 @@ using Skincare_Online_Shop_.NET.Models;
 
 namespace Skincare_Online_Shop_.NET.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext db;
@@ -23,100 +22,96 @@ namespace Skincare_Online_Shop_.NET.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
+
+        [HttpGet]
+        [Authorize(Roles = "Partner,Admin")]
         public ActionResult Index()
         {
-            if(TempData.ContainsKey("message"))
-            {
-                ViewBag.message = TempData["message"].ToString();
-            }
-
-            var categories = from category in db.Categories
-                             orderby category.CategoryName
-                             select category;
-            ViewBag.Categories = categories;
+            var categories = db.Categories.ToList();
+            ViewBag.AllCategories = categories;
             return View();
         }
 
-        public ActionResult Show(int id)
+        [Authorize(Roles = "Partner,Admin")]
+        public ActionResult Details(int id)
         {
             Category category = db.Categories.Find(id);
 
             if (category == null)
             {
-                TempData["message"] = "We couldn't locate the category in our database. Please check if it was deleted by an admin";
-                TempData["messageType"] = "alert-danger";
-                return RedirectToAction("Index", "Products");
+                return NotFound();
             }
 
             return View(category);
         }
 
-        public ActionResult New()
+        [Authorize(Roles = "Admin")]
+        public ActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        public ActionResult New(Category cat)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Create(Category category)
         {
-            if(ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                db.Categories.Add(cat);
-                db.SaveChanges();
-                TempData["message"] = "The category has been added!";
-                return RedirectToAction("Index");
+                return View(category);
             }
-            else
+
+            try
             {
-                return View(cat);
+                db.Categories.Add(category);
+                db.SaveChanges();
+                TempData["Success"] = "Category created successfully!";
+                return RedirectToAction("Index", "Categories");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while creating the category: " + ex.Message);
+                return View(category); // Revino la formular dacă apare o eroare
             }
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
         public ActionResult Edit(int id)
         {
-            Category category = db.Categories.Find(id);
-
+            var category = db.Categories.Find(id);
             if (category == null)
             {
-                TempData["message"] = "We couldn't locate the category in our database. Please check if it was deleted by an admin";
-                TempData["messageType"] = "alert-danger";
-                return RedirectToAction("Index", "Products");
+                return NotFound();
             }
-
             return View(category);
         }
 
         [HttpPost]
-        public ActionResult Edit(int id, Category requestCategory)
+        [Authorize(Roles = "Admin")]
+        public ActionResult Edit(Category category)
         {
-            Category category = db.Categories.Find(id);
-
             if (ModelState.IsValid)
             {
-
-                category.CategoryName = requestCategory.CategoryName;
+                db.Categories.Update(category);
                 db.SaveChanges();
-                TempData["message"] = "The category has been modified!";
                 return RedirectToAction("Index");
             }
-            else
-            {
-                return View(requestCategory);
-            }
+            return View(category);
         }
 
         [HttpPost]
-        public ActionResult Delete(int id)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Delete(int id)
         {
             Category category = db.Categories.Include("Products")
                                              .Include("Products.Reviews")
                                              .Where(c => c.Id == id)
                                              .First();// stergere in cascada
-
-            db.Categories.Remove(category);
-
-            TempData["message"] = "The category has been deleted!";
-            db.SaveChanges();
+            if (category != null)
+            {
+                db.Categories.Remove(category);
+                db.SaveChanges();
+            }
             return RedirectToAction("Index");
         }
     }

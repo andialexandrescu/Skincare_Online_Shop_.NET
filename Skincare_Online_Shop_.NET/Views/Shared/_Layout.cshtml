@@ -25,7 +25,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">Display products</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="New">Add new product</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Create">Add new product</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Categories" asp-action="Index">Display categories</a>
@@ -37,7 +37,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">Display products</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="New">Add new product</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Create">Add new product</a>
                             </li>
                         }
                         @if (User.IsInRole("User"))
@@ -47,13 +47,13 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Carts" asp-action="MyCart">
-                                Display Shopping Cart Details
+                            <a class="nav-link text-dark" asp-controller="Carts" asp-action="ShoppingHistory">
+                                Shopping History
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Carts" asp-action="StartNewOrder">
-                                New Shopping Cart
+                            <a class="nav-link text-dark" asp-controller="Carts" asp-action="MyCart">
+                                MyCart
                             </a>
                         </li>
                     </ul>

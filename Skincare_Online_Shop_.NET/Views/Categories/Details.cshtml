@@ -11,8 +11,7 @@
 <p>@Model.CategoryName</p>
 
 
-<form method="post" asp-controller="Categories" asp-action="Delete"
-      asp-route-id="@Model.Id">
+<form method="post" asp-controller="Categories" asp-action="Delete" asp-route-id="@Model.Id">
 
     <button class="btn btn-danger" type="submit">Delete category</button>
 

@@ -28,6 +28,12 @@ namespace Skincare_Online_Shop_.NET.Controllers
         [Authorize(Roles = "User,Partner,Admin")]
         public IActionResult ShoppingHistory()
         {
+            if (TempData.ContainsKey("message"))
+            {
+                ViewBag.Message = TempData["message"];
+                ViewBag.Alert = TempData["messageType"];
+            }
+
             SetAccessRights();
 
             if (User.IsInRole("Admin"))
@@ -66,31 +72,53 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
             var userId = _userManager.GetUserId(User);
             Cart latestCart = db.Carts.Include(c => c.CartProducts)
-                                       .ThenInclude(cp => cp.Product) // Include related products
+                                       .ThenInclude(cp => cp.Product)
                                        .Where(cart => cart.UserId == userId)
                                        .OrderByDescending(cart => cart.Date)
                                        .FirstOrDefault();
+
             if (latestCart == null)
             {
-                TempData["message"] = "No shopping cart created, please add products to your first ever order";
-                TempData["messageType"] = "alert-info";
                 // intorc un cos de cumparaturi gol
-                return View(new Cart { CartProducts = new List<CartProduct>() });// ca si cum as implementa un alt view empty datorita validarii pe model in MyCart
+                var newCart = new Cart
+                {
+                    UserId = userId,
+                    Date = DateTime.Now,
+                    PlacedOrder = false
+                };
+
+                db.Carts.Add(newCart);
+                db.SaveChanges();
+
+                TempData["message"] = "No shopping cart ever created, start adding products";
+                TempData["messageType"] = "alert-info";
+
+                return View(newCart);// ca si cum as implementa un alt view empty datorita validarii pe model in MyCart
             }
-            if (!latestCart.PlacedOrder)
+            if (!latestCart.PlacedOrder)// daca cosul de cumparaturi exista si inca nu a fost plasat ca si comanda, e afisat continutul lui
             {
                 return View(latestCart);// transmit in view-ul MyCart latestCart care nu a fost plasat ca si comanda
-            } else
-            {
-                TempData["message"] = "You have already placed an order with this cart";
-                TempData["messageType"] = "alert-info";
-                return Redirect("/Carts/ShoppingHistory");
             }
+            // cosul curent a fost deja plasat deci se va crea unul nou doar daca difera de null si a fost plasat ca si comanda
+            TempData["message"] = "You have already placed an order. A new shopping cart will be created";
+            TempData["messageType"] = "alert-info";
+
+            var newOrderCart = new Cart
+            {
+                UserId = userId,
+                Date = DateTime.Now,
+                PlacedOrder = false
+            };
+
+            db.Carts.Add(newOrderCart);
+            db.SaveChanges();
+
+            return RedirectToAction("MyCart");
         }
 
         // afisarea tuturor produselor pe care utilizatorul le-a salvat in cosul de cumparaturi cu un anumit id
         [Authorize(Roles = "User,Partner,Admin")]
-        public IActionResult Show(int id)
+        public IActionResult Details(int id)
         {
             if (TempData.ContainsKey("message"))
             {
@@ -174,7 +202,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
             // verific daca produsul e in stoc ca sa il pot adauga la comanda
             var product = db.Products.FirstOrDefault(p => p.Id == productId);// produsul retrived prin specficarea cantitatii via AddToCart, ma bazez pe id-ul primit in metoda
-            if (product == null || product.Quantity < quantity)
+            if (product == null || product.Stock < quantity)
             {
                 TempData["message"] = $"Insufficient stock for {product.Name}";
                 TempData["messageType"] = "alert-danger";
@@ -253,7 +281,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
             if (cartItem != null)
             {
                 var product = db.Products.FirstOrDefault(p => p.Id == productId);
-                if (product != null && quantity > product.Quantity)
+                if (product != null && quantity > product.Stock)
                 {
                     TempData["message"] = $"Insufficient stock for {product.Name}, cannot update quantity";
                     TempData["messageType"] = "alert-danger";
@@ -300,7 +328,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
             {
                 var product = db.Products.FirstOrDefault(p => p.Id == item.ProductId);
 
-                if (product == null || product.Quantity < item.Quantity)// verific cantitatea de stoc in cazul in care mai multi useri cumpara acelasi produs care ar fi in demand
+                if (product == null || product.Stock < item.Quantity)// verific cantitatea de stoc in cazul in care mai multi useri cumpara acelasi produs care ar fi in demand
                 {
                     TempData["message"] = $"Insufficient stock for{item.Product.Name}, order cannot be placed";// format string $
                     TempData["messageType"] = "alert-danger";
@@ -319,7 +347,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
                 if (product != null)
                 {
-                    product.Quantity -= item.Quantity;
+                    product.Stock -= item.Quantity;
                     db.Products.Update(product);
                 }
             }
@@ -329,25 +357,6 @@ namespace Skincare_Online_Shop_.NET.Controllers
             TempData["messageType"] = "alert-success";
 
             return RedirectToAction("ShoppingHistory");
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "User,Partner,Admin")]
-        public IActionResult StartNewOrder()
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var newCart = new Cart
-            {
-                UserId = userId,
-                Date = DateTime.Now,
-                PlacedOrder = false
-            };
-
-            db.Carts.Add(newCart);
-            db.SaveChanges();
-
-            return RedirectToAction("MyCart");
         }
 
         // afisare butoane de editare si stergere

@@ -1,12 +1,13 @@
 ﻿@model Skincare_Online_Shop_.NET.Models.Product
 
+<h2>Product form</h2>
 
 <h2 class="text-center mt-5">Add a new product</h2>
 <br />
 <div class="container mt-5">
     <div class="row">
         <div class="col-6 offset-3">
-            <form enctype="multipart/form-data" asp-controller="Products" asp-action="New">
+            <form enctype="multipart/form-data" asp-controller="Products" asp-action="Create">
 
                 <div asp-validation-summary="All" class="text-danger"></div>
 
@@ -58,10 +59,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Quantity" class="form-label">Stock quantity planned</label>
+                    <label asp-for="Stock" class="form-label">Stock quantity</label>
                     <br />
-                    <input asp-for="Quantity" class="form-control" type="number" />
-                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                    <input asp-for="Stock" class="form-control" type="number" />
+                    <span asp-validation-for="Stock" class="text-danger"></span>
                     <br />
                 </div>
 
@@ -80,5 +81,8 @@
 
             </form>
         </div>
+
+        <br />
+        <a href="/Products/Index" class="btn btn-secondary">Cancel</a>
     </div>
 </div>

@@ -8,10 +8,10 @@
     <div class="card-text">@Model.Ingredients</div>
     <div class="card-text">@Model.Price</div>
     <div class="card-text">@Model.Brand</div>
-    <div class="card-text">@Model.Quantity</div>
+    <div class="card-text">@Model.Stock</div>
 
-    <a asp-controller="Carts" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-success">Go to My Cart</a>
-    <a asp-controller="Carts" asp-action="MyCart" asp-route-productId="@Model.Id" class="btn btn-success">Show Cart</a>
+    <a asp-controller="Carts" asp-action="AddToCart" asp-route-productId="@Model.Id" class="btn btn-success">Add to MyCart</a>
+    <a asp-controller="Carts" asp-action="MyCart" asp-route-productId="@Model.Id" class="btn btn-success">Show MyCart</a>
 
     <div class="d-flex justify-content-between flex-row mt-5">
         <div><i class="bi bi-globe"></i>@Model.Category.CategoryName</div>

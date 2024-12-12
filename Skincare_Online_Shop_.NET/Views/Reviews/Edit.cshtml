@@ -6,9 +6,9 @@
 <form asp-action="Edit" asp-controller="Reviews" asp-route-id="@Model.Id" method="post">
 
     <div class="form-group">
-        <label asp-for="Rating" class="form-label">Product Rating</label>
-        <input asp-for="Rating" class="form-control" type="number"/>
-        <span asp-validation-for="Rating" class="text-danger"></span>
+        <label asp-for="Grade" class="form-label">Product grade</label>
+        <input asp-for="Grade" class="form-control" type="number"/>
+        <span asp-validation-for="Grade" class="text-danger"></span>
     </div>
     <br />
 
@@ -20,6 +20,6 @@
     </div>
     <br />
 
-    <button class="btn btn-primary" type="submit">Edit the review</button>
+    <button class="btn btn-primary" type="submit">Save</button>
 
 </form>

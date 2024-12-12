@@ -1,4 +1,10 @@
-﻿
+﻿@if (ViewBag.Message != null)
+{
+    <div class="p-3 rounded-3 text-center mb-5 @ViewBag.Alert">
+        @ViewBag.Message
+    </div>
+}
+
 <div class="row">
 
     @foreach (var cart in ViewBag.AllCarts)
@@ -15,7 +21,7 @@
                     }
                     <br />
 
-                    <a asp-controller="carts" asp-action="Show" asp-route-id="@cart.Id" class="btn alert-success">Display shopping cart contents</a>
+                    <a asp-controller="Carts" asp-action="Details" asp-route-id="@cart.Id" class="btn alert-success">Display shopping cart contents</a>
 
                 </div>
             </div>

@@ -1,8 +1,6 @@
-﻿@{
-    ViewBag.Title = "List of categories";
-}
+﻿@model Skincare_Online_Shop_.NET.Models.Category
 
-<h2>@ViewBag.Title</h2>
+<h2>List of categories</h2>
 <br />
 
 @if (TempData.ContainsKey("message"))
@@ -12,20 +10,16 @@
 
 <br />
 
-@foreach (Skincare_Online_Shop_.NET.Models.Category category in ViewBag.Categories)
+@foreach (var category in (ViewBag.AllCategories as IEnumerable<Skincare_Online_Shop_.NET.Models.Category>) ?? Enumerable.Empty<Skincare_Online_Shop_.NET.Models.Category>())
 {
-    <div class="form-group">
-        <label asp-for="@category.CategoryName" class="form-label">Category name</label>
-        <div><i class="bi bi-globe"></i> @category.CategoryName</div>
-    </div>
+    <li>Category Id: @category.Id - Category Name: @category.CategoryName</li>
     <br />
-    <a class="btn alert-success" asp-controller="Categories" asp-action="Show" asp-route-id="@category.Id">Display category</a>
+    <a class="btn alert-success" asp-controller="Categories" asp-action="Details" asp-route-id="@category.Id">Display category</a>
     <a class="btn alert-success" asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id">Modify category</a>
     <br />
     <br />
 
 }
 <br />
-<a class="btn btn-success" asp-controller="Categories" asp-action="New">Add a new category</a>
+<a class="btn btn-success" asp-controller="Categories" asp-action="Create">Add a new category</a>
 <br />
-

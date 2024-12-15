@@ -1,0 +1,47 @@
+﻿@model IEnumerable<Skincare_Online_Shop_.NET.Models.Product>
+
+<h2>Pending Approval</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="p-3 rounded-3 text-center mb-5 @ViewBag.Alert">
+        @ViewBag.Message
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Posted By</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if(Model.Any())
+        {
+            foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Description</td>
+                    <td>@product.Price.ToString("C")</td>
+                    <td>@product.User.UserName</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-primary">Display product details</a>
+                        <a asp-action="Approve" asp-route-id="@product.Id" class="btn btn-success">Approve</a>
+                        <a asp-action="Reject" asp-route-id="@product.Id" class="btn btn-danger">Reject</a>
+                    </td>
+                </tr>
+            }
+        } else
+        {
+            <tr>
+                <td colspan="5" class="text-center">No products are pending approval</td>
+            </tr>
+        }
+    </tbody>
+    <a asp-controller="Products" asp-action="Index" class="btn btn-primary">Return to products</a>
+</table>

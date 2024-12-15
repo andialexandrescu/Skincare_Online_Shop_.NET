@@ -27,12 +27,32 @@ namespace Skincare_Online_Shop_.NET.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
+        /*private static double CalculateAverageRating(Product product)
+        {
+            if (product.Reviews != null && product.Reviews.Any())
+            {
+                double totalGrade = 0;
+                int reviewCount = 0;
 
-        [Authorize(Roles = "User,Partner,Admin")]
+                foreach(var review in product.Reviews)
+                {
+                    totalGrade += review.Grade;
+                    reviewCount++;
+                }
+
+                return totalGrade/reviewCount;
+            }
+            return 0;
+        }*/
+        [AllowAnonymous]// nu necesita autorizare
+        //[Authorize(Roles = "User,Partner,Admin")]
         public IActionResult Index()
         {
             var products = db.Products.Include("Category")
-                                      .Include("User");
+                                      .Include("User")
+                                      .Include("Reviews")
+                                      .Include("Reviews.User")
+                                      .Where(p => p.RequestStatus == Product.Status.Approved);
 
             if (TempData.ContainsKey("message"))
             {
@@ -69,9 +89,15 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
                 products = db.Products.Where(p => productIds.Contains(p.Id))
                                       .Include("Category")
-                                      .Include("User");
+                                      .Include("User")
+                                      .Include("Reviews")
+                                      .Include("Reviews.User")
+                                      .Where(p => p.RequestStatus == Product.Status.Approved);
             }
             ViewBag.SearchString = search;
+
+            int initialCount = products.Count();
+            Console.WriteLine($"Initial product count: {initialCount}");
 
             var sortOrder = Convert.ToString(HttpContext.Request.Query["sortOrder"]);// un utilizator selecteaza o optiune de sortare din meniul dropdown din vizualizare, care va fi trimisa inapoi la server folosind get
             ViewBag.SortOrder = sortOrder;
@@ -92,13 +118,24 @@ namespace Skincare_Online_Shop_.NET.Controllers
                     products = products.OrderByDescending(p => p.Price);
                     break;
                 case "rating_asc":
-                    products = products.OrderBy(p => p.Rating);
+                    //products = products.OrderBy(p => CalculateAverageRating(p));
+                    // varianta in care folosesc metoda CalculateAverageRating va returna la debug sortedCount egal cu 0
+                    // noua varianta pastreaza linq aplicat pe obiectele p, intr-un inline lambda expression
+                    products = products.OrderBy(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Grade) : 0);// fiecarui p din colectia products ii este verificat join-ul cu Reviews daca intoarce rezultate sau nu  (operator ternar, cond ? instr_cond_adev : instr_cond_fals), daca intoarce se calculeaza un average, altfel e implicit considerat 0 rating-ul produsului si este pus pe o poz coresp in sortarea cu orderby
                     break;
                 case "rating_desc":
-                    products = products.OrderByDescending(p => p.Rating);
+                    //products = products.OrderByDescending(p => CalculateAverageRating(p));
+                    products = products.OrderByDescending(p => p.Reviews.Any() ? p.Reviews.Average(r => r.Grade) : 0);
                     break;
                 default:
                     break;// nu se aplica nicio sortare
+            }
+
+            int sortedCount = products.Count();
+            Console.WriteLine($"Count after sorting by rating: {sortedCount}");
+            foreach (var product in products)
+            {
+                Console.WriteLine($"Product ID: {product.Id}, Review Count: {product.Reviews.Count()}");
             }
 
             // sectiunea de afisare paginata
@@ -124,7 +161,8 @@ namespace Skincare_Online_Shop_.NET.Controllers
             return View();
         }
 
-        [Authorize(Roles = "User,Partner,Admin")]
+        [AllowAnonymous]
+        //[Authorize(Roles = "User,Partner,Admin")]
         public IActionResult Details(int id)// afisarea detaliilor unui singur produs in functie de id
         {
             var product = db.Products.Include("Category")
@@ -133,9 +171,17 @@ namespace Skincare_Online_Shop_.NET.Controllers
                                          .Include("Reviews.User")
                               .Where(p => p.Id == id)
                               .First();
+
             if (product == null)
             {
                 return NotFound();
+            }
+
+            if (product.RequestStatus == Product.Status.Unverified && !User.IsInRole("Admin"))
+            {
+                TempData["message"] = "You do not have permission to view this unverified product.";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
             }
 
             SetAccessRights();
@@ -170,6 +216,13 @@ namespace Skincare_Online_Shop_.NET.Controllers
             // preluam Id-ul utilizatorului care posteaza produsul
             product.UserId = _userManager.GetUserId(User);
             product.DateListed = DateTime.Now;
+            if (User.IsInRole("Admin"))
+            {
+                product.RequestStatus = Product.Status.Approved;
+            } else
+            {
+                product.RequestStatus = Product.Status.Unverified;// e unverified pentru cineva care nu e admin
+            }
 
             if (image != null && image.Length > 0)
             {
@@ -205,17 +258,18 @@ namespace Skincare_Online_Shop_.NET.Controllers
                 return View(product);
             }
             
-            db.Products.Add(product);// e adaugat si produsul care are inca un request fals, deoarece urmeaza sa fie aprobat sau nu
+            db.Products.Add(product);
             await db.SaveChangesAsync();
             if (User.IsInRole("Admin"))
             {
                 TempData["message"] = "The product was added successfully!";
+                TempData["messageType"] = "alert-success";
             }
-            if (User.IsInRole("Partner"))
+            else
             {
-                TempData["message"] = "The product submission request has been sent to the admin";// de implementat mai tarziu
+                TempData["message"] = "The product has been added successfully and is pending submission approval, until then it won't be visible on our online platform";
+                TempData["messageType"] = "alert-success";
             }
-            TempData["messageType"] = "alert-success";
             return RedirectToAction("Index");
         }
 
@@ -267,6 +321,14 @@ namespace Skincare_Online_Shop_.NET.Controllers
                     product.DateListed = DateTime.Now;
                     product.Stock = requestProduct.Stock;
                     product.CategoryId = requestProduct.CategoryId;
+                    if (User.IsInRole("Admin"))
+                    {
+                        product.RequestStatus = Product.Status.Approved;
+                    }
+                    else
+                    {
+                        product.RequestStatus = Product.Status.Unverified;
+                    }
 
                     if (image != null && image.Length > 0)
                     {
@@ -294,7 +356,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
                         ModelState.Remove(nameof(product.Image));
                         product.Image = databaseFileName;
                     }
-                    /*ModelState.ClearValidationState(nameof(product));
+                    /* ModelState.ClearValidationState(nameof(product));
                     if (!TryValidateModel(product))
                     {
                         product.Categ = GetAllCategories();
@@ -302,8 +364,15 @@ namespace Skincare_Online_Shop_.NET.Controllers
                     }*/
 
                     await db.SaveChangesAsync();
-                    TempData["message"] = "The product has been successfully updated";
-                    TempData["messageType"] = "alert-success";
+                    if (User.IsInRole("Admin"))
+                    {
+                        TempData["message"] = "The product was added successfully!";
+                        TempData["messageType"] = "alert-success";
+                    } else
+                    {
+                        TempData["message"] = "The product has been updated successfully and is pending re-approval, until then it won't be visible on our online platform";
+                        TempData["messageType"] = "alert-success";
+                    }
                     return RedirectToAction("Index");
                 }
 
@@ -358,6 +427,67 @@ namespace Skincare_Online_Shop_.NET.Controllers
             ViewBag.UserCurent = _userManager.GetUserId(User);
             ViewBag.EsteAdmin = User.IsInRole("Admin");
         }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> PendingApproval()
+        {
+            var pendingProducts = await db.Products
+                                           .Include(p => p.User)
+                                           .Where(p => p.RequestStatus == Product.Status.Unverified)
+                                           .ToListAsync();
+            
+            if (TempData.ContainsKey("message"))
+            {
+                ViewBag.Message = TempData["message"];
+                ViewBag.Alert = TempData["messageType"];
+            }
+            return View(pendingProducts);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Approve(int id)
+        {
+            var product = await db.Products.Include(p => p.User)
+                                           .FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.RequestStatus = Product.Status.Approved;
+            if(ModelState.IsValid)
+            {
+                await db.SaveChangesAsync();
+                TempData["message"] = $"The product '{product.Name}' posted by '{product.User.UserName}' has been approved successfully!";
+                TempData["messageType"] = "alert-success";
+            }
+
+            return RedirectToAction("PendingApproval");
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Reject(int id)
+        {
+            var product = await db.Products.Include(p => p.User)
+                                           .FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            product.RequestStatus = Product.Status.Rejected;
+            if (ModelState.IsValid)
+            {
+                await db.SaveChangesAsync();
+                TempData["message"] = $"The product '{product.Name}' posted by '{product.User.UserName}' has been rejected successfully!";
+                TempData["messageType"] = "alert-success";
+            }
+
+            return RedirectToAction("PendingApproval");
+        }
+
+
+
         /*public ActionResult Requests()
         {
             var products = db.Products.Include("Category").Include("User");

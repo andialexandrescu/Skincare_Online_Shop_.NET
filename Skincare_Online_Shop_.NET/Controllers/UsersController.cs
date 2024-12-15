@@ -40,7 +40,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
             return View();
         }
 
-        public async Task<ActionResult> Show(string id)// string generat folosind guid
+        public async Task<ActionResult> Details(string id)// string generat folosind guid
         {
             ApplicationUser user = db.Users.Find(id);
 
@@ -110,7 +110,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
                 var roles = db.Roles.ToList();
                 foreach (var role in roles)
                 {
-                    // Scoatem userul din rolurile anterioare
+                    // scoatem userul din rolurile anterioare
                     await _userManager.RemoveFromRoleAsync(user, role.Name);
                 }
                 // adaugam noul rol selectat

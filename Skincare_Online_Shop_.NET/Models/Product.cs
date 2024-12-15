@@ -43,8 +43,13 @@ namespace Skincare_Online_Shop_.NET.Models
 
         public string Brand { get; set; }
 
-        [Range(1, 5, ErrorMessage = "The rating must be between 1 and 5")]
-        public float? Rating { get; set; }// va fi computat pe baza unui average de rating-uri de la review-uri
+        public Status RequestStatus { get; set; } = Status.Unverified;
+        public enum Status
+        {
+            Unverified,
+            Approved,
+            Rejected
+        }
         //public bool Request { get; set; }
 
         [Required(ErrorMessage = "Adding the product category is required")]

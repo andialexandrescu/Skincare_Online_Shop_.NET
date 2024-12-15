@@ -79,20 +79,24 @@ else
 }
 
 @* afisarea formularului in care se poate adauga un review *@
-<h3>Add a Review</h3>
-<form asp-action="AddReview" asp-controller="Reviews" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="ProductId" value="@Model.Id" />
-    <div class="form-group">
-        <label for="Content">Comment:</label>
-        <textarea class="form-control" name="Content"></textarea>
-    </div>
-    <div class="form-group">
-        <label for="Grade">Grade (1-5):</label>
-        <input id="Grade" name="Grade" type="number" min="1" max="5" class="form-control" required />
-    </div>
-    <button type="submit" class="btn btn-primary">Post</button>
-</form>
+
+@if(User.IsInRole("User") || User.IsInRole("Partner") || User.IsInRole("Admin"))
+{
+    <h3>Add a Review</h3>
+    <form asp-action="AddReview" asp-controller="Reviews" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ProductId" value="@Model.Id" />
+        <div class="form-group">
+            <label for="Content">Comment:</label>
+            <textarea class="form-control" name="Content"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="Grade">Grade (1-5):</label>
+            <input id="Grade" name="Grade" type="number" min="1" max="5" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Post</button>
+    </form>
+}
 
 <br />
 <a href="/Products/Index" class="btn btn-success">See other products</a>

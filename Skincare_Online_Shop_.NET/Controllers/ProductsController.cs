@@ -179,7 +179,7 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
             if (product.RequestStatus == Product.Status.Unverified && !User.IsInRole("Admin"))
             {
-                TempData["message"] = "You do not have permission to view this unverified product.";
+                TempData["message"] = "You do not have permission to view this unverified product";
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Index");
             }
@@ -196,11 +196,11 @@ namespace Skincare_Online_Shop_.NET.Controllers
             var categories = db.Categories.ToList();
             if (categories == null || !categories.Any())
             {
-                Console.WriteLine("No categories found in the database.");
+                Console.WriteLine("No categories found in the database");
             }
             else
             {
-                Console.WriteLine($"Loaded {categories.Count} categories.");
+                Console.WriteLine($"Loaded {categories.Count} categories");
             }
 
             Product product = new Product();
@@ -485,33 +485,6 @@ namespace Skincare_Online_Shop_.NET.Controllers
 
             return RedirectToAction("PendingApproval");
         }
-
-
-
-        /*public ActionResult Requests()
-        {
-            var products = db.Products.Include("Category").Include("User");
-            ViewBag.Products = products;
-            if(TempData.ContainsKey("message"))
-            {
-                ViewBag.Message = TempData["message"];
-            }
-            return View();
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public ActionResult ValidateRequest(int id)
-        {
-            Product product = db.Products.Find(id);
-            product.Request = true;
-            if(ModelState.IsValid)
-            {
-                db.SaveChanges();
-                TempData["message"] = "The product has been approved succesfully!";
-            }
-            return Redirect("Index");
-        }*/
 
         [NonAction]
         public IEnumerable<SelectListItem> GetAllCategories()

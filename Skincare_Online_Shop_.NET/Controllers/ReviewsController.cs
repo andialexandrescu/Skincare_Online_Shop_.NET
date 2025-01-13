@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Skincare_Online_Shop_.NET.Data;
 using Skincare_Online_Shop_.NET.Models;
+using System.Security.Claims;
 
 namespace Skincare_Online_Shop_.NET.Controllers
 {
@@ -27,10 +28,12 @@ namespace Skincare_Online_Shop_.NET.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddReview(Review review)
         {
+            review.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             Console.WriteLine("AddReview method called.");
             Console.WriteLine($"ProductId: {review.ProductId}");
             Console.WriteLine($"Content: {review.Content}");
             Console.WriteLine($"Grade: {review.Grade}");
+            Console.WriteLine($"UserId: {review.UserId}");
 
             review.Date = DateTime.Now;
             db.Reviews.Add(review);

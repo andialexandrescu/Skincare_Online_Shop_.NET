@@ -7,7 +7,7 @@ namespace Skincare_Online_Shop_.NET.Models
     {
         [Key]
         public int Id { get; set; }
-
+         
         public DateTime Date { get; set; }
 
         public bool PlacedOrder { get; set; } = false;// daca a fost plasata comanda pt cosul de cumparaturi coresp si la default e false

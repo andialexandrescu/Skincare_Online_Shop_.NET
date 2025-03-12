@@ -1,6 +1,10 @@
 # Project Title:
 ## Terra_Skin_Alchemy_WebApp_.NET
 
+## Project Summary
+
+It is a site that works with an MSSQLLocalDB database, written using C#, LINQ, and ASP.NET, which simulates the purchase of personal care products. Users can browse detailed product information, including category, reviews and available stock, along with placing them in the cart and completing an order. Users can also have multiple roles, with store admins, customers, and partners submitting product approval requests, which will be processed by the admins. There is also implemented a search engine and the possibility of sorting products according to price and average ratings. Developed in 3 stages, team coordination being carried out via the Trello platform.
+
 # Description of the "Online Shop" Platform with the Following Functionalities:
 
 - [x] There are 4 types of users: unregistered user, registered user, collaborator, and administrator (0.5p).

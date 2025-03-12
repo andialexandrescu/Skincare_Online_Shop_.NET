@@ -1,5 +1,5 @@
 # Titlul proiectului:
-## Skincare_Online_Shop_.NET
+## Terra_Skin_Alchemy_WebApp_.NET
 
 # Descrierea platformei “Online shop” cu urmatoarele functionalitati:
 

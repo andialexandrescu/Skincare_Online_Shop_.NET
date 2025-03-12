@@ -1,3 +1,45 @@
+# Project Title:
+## Terra_Skin_Alchemy_WebApp_.NET
+
+# Description of the "Online Shop" Platform with the Following Functionalities:
+
+- [x] There are 4 types of users: unregistered user, registered user, collaborator, and administrator (0.5p).
+
+- [x] The collaborator user can add products to stores. They send addition requests to the administrator, who can either reject or approve them. After approval, the products can be viewed in the store (1.0p).
+
+- [x] Products belong to categories. Categories are dynamically created by the administrator. Dynamically means that the administrator can add new categories directly from the application interface. Additionally, the admin can view, edit, and delete categories whenever necessary (1.0p).
+
+- [x] A product has a title, description, image, price, stock, rating (1-5 stars), and user reviews. Each user can give a rating from 1 to 5. The rating is not a mandatory field. Ultimately, each product has a score calculated based on all existing ratings. The review is a text comment left by users. This field is not mandatory. The rest of the fields are mandatory. The stock represents the number of products in the database (1.0p).
+
+- [x] The collaborator user can edit and delete the products they added. After editing, the product requires approval from the administrator again (1.0p).
+
+- [x] The unregistered user will be redirected to create an account when attempting to add a product to the cart. When they do not have an account, they can only view products and their associated comments (0.5p).
+
+- [x] When a user becomes a registered user, they can place orders (add products to the cart) and leave reviews (rating or text), which they can later edit or delete (1.0p). When a user adds a product to the cart, they can also select the quantity. When the order is (fictitiously) placed, the product stock must decrease accordingly based on the number of products purchased (0.5p).
+
+- [x] Products can be searched by name using a search engine. Additionally, products do not need to be searched by their full name. They should also be found if a user searches for only certain parts of the name (1.0p).
+
+- [x] The search engine results can be sorted in ascending or descending order based on price and the number of stars (filters will be implemented for users to choose from) (0.5p).
+
+- [x] The administrator can delete and edit both products and comments. They can also activate or revoke user rights (1.0p).
+
+# Technical Implementations:
+
+- (1) We agreed on a common implementation for Products, Categories, and Reviews, so that we have a foundation to develop Carts and CartProducts (which resolve the many-to-many relationship between products and shopping carts). This involves the existence of the Quantity attribute in CartProducts and other foreign keys along with virtual properties for associating the tables to which those foreign keys belong, allowing access to other properties. The resolution of the many-to-many relationship can be seen in ApplicationDbContext.
+
+- (2) We developed the idea of having 4 types of users, meaning that each public action in each controller received the corresponding `Authorize(Roles="")` attributes, and we established that the Admin would have almost no restrictions on the data they can delete or edit. It is important to note that the unregistered user only needs to create an account, becoming implicitly a User and potentially a Partner (the user who collaborates with the store and adds products) or even an Admin if one of the administrators desires this (via the UsersController).
+
+- (3) We slightly modified the logic to know exactly who posted products and reviews, so that using the private `SetAccessRights` method at the level of each controller (ProductsController and ReviewsController), buttons for deletion and editing are displayed in Views if the respective product/review belongs to the user (Partner or User, since Admin has no restrictions).
+
+- (4) We manipulated the Image attribute in the Product class, of type IFormFile, which can be observed in the Create and Edit actions in ProductsController.
+
+- (5) Once we had enough product entries in the local database, we implemented pagination, filtering results by price, and an average of ratings from all reviews associated with each product, along with a search engine. Regarding pagination and how it works alongside filtering, if no ascending/descending sorting type is selected, then no filter will be applied, and pagination will not be affected. It is specified in the requirements that this search engine must have a partial search for the Name attribute of Product only after it has been entered in the search bar (note that a similar implementation could be added for partial search for Content in Review). Additionally, the average Rating of reviews posted for a specific product will be calculated dynamically, meaning with each review added, and it is only displayed in the shared View in Shared, named ProductInfo, which calculates the average in the Overall Rating section (we mentioned this because initially we thought that Product should have a Rating attribute that would be modified each time a review is created, edited, or deleted, but that would have complicated things, so we found a good solution that allows sorting by the criteria rating_asc and rating_desc using lambda functions).
+
+- (6) We implemented the approval and rejection requests for products proposed to be sold in the store by a partner. This idea was expressed at the code level using an enum with three possible values: Approved, Rejected, and Unverified. This means that once a product is created, the request is sent in the Create method in ProductsController, and until it is approved/rejected by an Admin who accesses the PendingApproval View (which displays only those products for which the RequestStatus attribute is Unverified), the product will simply not be displayed on the main page of the site with a display condition only for Accepted products in Index in ProductsController (we refer to what was set as the default URL path in Program.cs in MapControllerRoute, i.e., the Index View in Products). Of course, the entire process meant that the Edit method, even if the product was initially approved to appear in the online store, will modify the RequestStatus attribute of the edited product from Accepted to Unverified. Therefore, new methods are available only to the Admin: PendingApproval, which has a corresponding View, and Approve and Reject, which do not have separate Views (the logic is contained in the PendingApproval View).
+
+- (7) When a product is to be added to the cart, the user must be logged in. If they are not logged in, they do not have access to much information on the site, only the Index and Details methods in ProductsController via AllowAnonymous. Therefore, once the Add To Cart button is clicked on the Details page of a product, the user is prompted to log in.
+
+
 # Titlul proiectului:
 ## Terra_Skin_Alchemy_WebApp_.NET
 
